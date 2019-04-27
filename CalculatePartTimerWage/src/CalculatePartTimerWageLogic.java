@@ -1,8 +1,10 @@
 import java.math.BigDecimal;
-import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-public class CalculatePartTimerWage {
+public class CalculatePartTimerWageLogic {
     private static final String SEPARATOR = ",";
 
     public static void main(String[] args) {
@@ -23,8 +25,9 @@ public class CalculatePartTimerWage {
             // アルバイト従業員のデータを取り出し
             String[] partTimerDetail = partTimer.split(SEPARATOR);
             String targetId = partTimerDetail[0];
-            String targetName = partTimerDetail[1];
-            BigDecimal PerHourWage = new BigDecimal(partTimerDetail[2]);
+            BigDecimal perHourWage = new BigDecimal(partTimerDetail[2]);
+
+            // 月給計算用の変数
             BigDecimal totalWage = BigDecimal.ZERO;
 
             for (String attendance : attendances) {
@@ -37,19 +40,27 @@ public class CalculatePartTimerWage {
                 }
 
                 // 労働時間の計算
-                Time start = Time.valueOf(attendanceDetail[2]);
-                Time finish = Time.valueOf(attendanceDetail[3]);
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+                Date start = null;
+                Date finish = null;
+                try {
+                    start = format.parse(attendanceDetail[2]);
+                    finish = format.parse(attendanceDetail[3]);
+                } catch (ParseException e) {
+                    e.getStackTrace();
+                }
                 WorkTimeCalculator workTimeCalculator = new WorkTimeCalculator(start, finish);
-                int workTime = workTimeCalculator.getWorkTimeByMinute();
+                int workTimeByMinute = workTimeCalculator.getWorkTimeByMinute();
 
                 // 日給の計算
-                WageCalculator wageCalculator = new WageCalculator(PerHourWage, new BigDecimal(workTime));
+                WageCalculator wageCalculator = new WageCalculator(perHourWage, new BigDecimal(workTimeByMinute));
                 BigDecimal dailyWage = wageCalculator.getDailyWage();
 
                 // 合計金額に加算
                 totalWage = totalWage.add(dailyWage);
             }
 
+            String targetName = partTimerDetail[1];
             System.out.println(targetName + " さんのお給料は " + totalWage + " 円でした。");
         }
     }

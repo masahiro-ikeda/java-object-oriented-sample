@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * ファイルを読み込んで、データをList<String>形式で取得
+ * ファイル管理を行う専用クラス
  */
 public class FileManager {
 
@@ -24,7 +24,7 @@ public class FileManager {
     /**
      * ファイル読み込み
      *
-     * @return List<String> ファイルに格納されているデータ
+     * @return List<String> ファイルに格納されたデータ
      */
     public List<String> getContent() {
 

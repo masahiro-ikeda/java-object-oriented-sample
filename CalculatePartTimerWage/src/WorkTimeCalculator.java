@@ -9,6 +9,12 @@ public class WorkTimeCalculator {
     // フィールド定数
     private static final long ONE_MINUTE = 1000 * 60; // ミリ秒で1分
 
+    // 休憩時間計算に使うフィールド定数
+    private static final long ONE_HOUR = 60 * ONE_MINUTE;
+    private static final long EIGHT_HOUR = 8 * ONE_HOUR;
+    private static final long SIX_HOUR = 6 * ONE_HOUR;
+    private static final long FORTY_FIVE_MINUTE = 45 * ONE_MINUTE;
+
     // フィールド変数
     private final Date start; // 開始時間
     private final Date finish; // 終了時間
@@ -38,32 +44,14 @@ public class WorkTimeCalculator {
         long workTime = start - finish;
 
         // 休憩時間を反映させる
-        long actualWorkTime = getActualWorkTime(workTime);
-
-        // 分単位に変換 & int型にキャストしてreturn
-        long actualWorkTimeByMinute = actualWorkTime / ONE_MINUTE;
-        return (int) actualWorkTimeByMinute;
-    }
-
-    // 休憩時間計算用のフィールド定数
-    private static final long ONE_HOUR = 60 * ONE_MINUTE;
-    private static final long EIGHT_HOUR = 8 * ONE_HOUR;
-    private static final long SIX_HOUR = 6 * ONE_HOUR;
-    private static final long FORTY_FIVE_MINUTE = 45 * ONE_MINUTE;
-
-    // 休憩時間を反映して実労働時間を計算
-    private long getActualWorkTime(long workTime) {
-
-        long actualWorkTime;
-
         if (workTime >= EIGHT_HOUR) {
-            actualWorkTime = workTime - ONE_HOUR;
+            workTime = workTime - ONE_HOUR;
         } else if (workTime >= SIX_HOUR) {
-            actualWorkTime = workTime - FORTY_FIVE_MINUTE;
-        } else {
-            actualWorkTime = workTime;
+            workTime = workTime - FORTY_FIVE_MINUTE;
         }
 
-        return actualWorkTime;
+        // 分単位に変換 & int型にキャストしてreturn
+        long workTimeByMinute = workTime / ONE_MINUTE;
+        return (int) workTimeByMinute;
     }
 }

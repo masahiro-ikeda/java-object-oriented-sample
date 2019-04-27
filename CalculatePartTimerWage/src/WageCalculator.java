@@ -25,6 +25,9 @@ public class WageCalculator {
         this.workTimeByMinute = workTimeByMinute;
     }
 
+    // 法定労働時間
+    private final static BigDecimal LEGAL_WORKING_TIME = new BigDecimal(8).multiply(ONE_HOUR_BY_MINUTE);
+
     /**
      * 日給を計算する
      *
@@ -32,25 +35,45 @@ public class WageCalculator {
      */
     public BigDecimal getDailyWage() {
 
-        /*
-         * ここでは労働時間をhour単位に変換して計算していますが、
-         * 時給を分給に変換して計算する方法もあります。
-         *
-         * <例> 時給1200円で3時間30分働いた場合
-         *      ・時給1200円 * 3.5時間 = 日給4200円
-         *      ・分給20円 * 210分 = 日給4200円
-         *
-         * 法律的には給与は分単位で支払うことになっているので後者の方が正確かもしれません。
-         */
+        BigDecimal basicWorkTime; // 基本労働時間
+        BigDecimal overWorkTime; // 時間外労働時間
 
-        // 労働時間を 分 -> 時間 単位へ
-        BigDecimal workTimeByHour = this.workTimeByMinute.divide(ONE_HOUR_BY_MINUTE, 0, RoundingMode.DOWN);
+        // 総労働時間から基本労働時間と時間外労働時間の算出
+        if (this.workTimeByMinute.compareTo(LEGAL_WORKING_TIME) > 0) {
+            basicWorkTime = LEGAL_WORKING_TIME;
+            overWorkTime = workTimeByMinute.subtract(LEGAL_WORKING_TIME);
+        } else {
+            basicWorkTime = this.workTimeByMinute;
+            overWorkTime = BigDecimal.ZERO;
+        }
 
-        // 日給額を計算
-        BigDecimal dailyWage = this.perHourWage.multiply(workTimeByHour);
+        // 基本賃金を計算
+        BigDecimal basicWage = calculateWage(basicWorkTime, false);
+        // 時間外割増賃金の計算
+        BigDecimal overTimeWage = calculateWage(overWorkTime, true);
+        // 日給の計算
+        BigDecimal dailyWage = basicWage.add(overTimeWage);
 
-        // 端数処理
+        // 念のために端数処理してreturn
         dailyWage = dailyWage.setScale(0, RoundingMode.DOWN);
         return dailyWage;
+    }
+
+    // 残業代の割増割合
+    private static final BigDecimal OVER_TIME_PREMIUM = new BigDecimal("1.25");
+
+    // 賃金計算処理を共通化
+    private BigDecimal calculateWage(BigDecimal workTime, boolean isOverTime) {
+
+        // 労働時間を 分 -> 時間 単位へ
+        BigDecimal workTimeByHour = workTime.divide(ONE_HOUR_BY_MINUTE, 0, RoundingMode.DOWN);
+
+        // 時給額に割増単価を反映
+        BigDecimal actualPerHourWage = this.perHourWage;
+        if (isOverTime) {
+            actualPerHourWage = actualPerHourWage.multiply(OVER_TIME_PREMIUM);
+        }
+
+        return actualPerHourWage.multiply(workTimeByHour);
     }
 }

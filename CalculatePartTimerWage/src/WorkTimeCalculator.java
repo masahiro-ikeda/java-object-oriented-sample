@@ -41,7 +41,7 @@ public class WorkTimeCalculator {
         long finish = this.finish.getTime();
 
         // 労働時間を算出
-        long workTime = start - finish;
+        long workTime = finish - start;
 
         // 休憩時間を反映させる
         if (workTime >= EIGHT_HOUR) {

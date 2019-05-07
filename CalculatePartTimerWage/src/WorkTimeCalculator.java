@@ -35,7 +35,7 @@ public class WorkTimeCalculator {
         long finish = this.finish.getTime();
 
         // 労働時間を算出
-        long workTime = start - finish;
+        long workTime = finish - start;
 
         // 分単位に変換 & int型にキャストしてreturn
         long workTimeByMinute = workTime / ONE_MINUTE;
